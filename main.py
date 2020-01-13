@@ -8,10 +8,10 @@ mempool = cp.get_default_memory_pool()
 pinned_mempool = cp.get_default_pinned_memory_pool()
 mempool.free_all_blocks()
 pinned_mempool.free_all_blocks()
-def check_CFL(V,N,z,D,dt,h):
+def check_CFL(V,N,z,D,dt):
     u = cp.zeros(N-1)
-    u[:] = z*D*(V[2:N+1]-V[0:N-1])/(h*const.Vt)
-    maxCFL = max(abs(u*dt/h))
+    u[:] = z*D/input.H*input.V0/const.Vt*(V[2:N+1]-V[0:N-1])*N/2
+    maxCFL = max(abs(u*dt*N/(input.f*input.H)))
     print("MaxCFL = ",maxCFL)
 
 params = input.Params()
@@ -40,8 +40,8 @@ while t<1:
     #while error_np > params.tolerance:
     gauss.set_rhs(oldnp, oldnm, v_leftBC, v_rightBC, params)
     newv = lsqr((1-params.gamma)*gauss.M,-params.gamma*gauss.M.dot(oldv)+gauss.rhs)[0]
-    #check_CFL(newv,num_cell,params.zp,input.Dp,dt,params.dy)
-    check_CFL(newv,num_cell,params.zm,input.Dm,dt,params.dy)
+    #check_CFL(newv,num_cell,params.zp,input.Dp,dt)
+    check_CFL(newv,num_cell,params.zm,input.Dm,dt)
     cont_np.setup_matrix(params, newnp)
     newnp = lsqr(cont_np.M_exp,cont_np.M_imp.dot(oldnp))[0]
     
